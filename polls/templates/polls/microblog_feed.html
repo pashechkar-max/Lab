@@ -1,0 +1,144 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Лента микроблогов{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Микроблоги</h1>
+
+    {% if user.is_authenticated %}
+    <div>
+        <h3>Создать новый пост</h3>
+        <form method="post" action="{% url 'polls:create_post' %}">
+            {% csrf_token %}
+            <div>
+                <textarea name="content" rows="4" placeholder="Что у вас нового?" maxlength="1000" required></textarea>
+            </div>
+            <button type="submit">Опубликовать</button>
+        </form>
+    </div>
+    <hr>
+    {% endif %}
+
+    <div>
+        <h2>Последние посты</h2>
+
+        {% for post in page_obj %}
+        <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <img src="{{ post.author.profile.avatar.url }}" alt="Аватар" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
+                <div>
+                    <h4 style="margin: 0;">
+                        <a href="{% url 'polls:user_profile' post.author.username %}">{{ post.author.username }}</a>
+                    </h4>
+                    <small>{{ post.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+
+                {% if user == post.author %}
+                <div style="margin-left: auto;">
+                    <a href="{% url 'polls:edit_post' post.id %}" style="margin-right: 10px;">Редактировать</a>
+                    <a href="{% url 'polls:delete_post' post.id %}" style="color: red;">Удалить</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <p>{{ post.content|linebreaks }}</p>
+
+            <div style="display: flex; gap: 20px; margin-top: 10px;">
+                <form method="post" action="{% url 'polls:like_post' post.id %}" class="like-form">
+                    {% csrf_token %}
+                    <button type="submit" style="border: none; background: none; cursor: pointer;">
+                        {% if user.is_authenticated and user in post.likes.all %}
+                        ❤️
+                        {% else %}
+                        🤍
+                        {% endif %}
+                        <span class="likes-count">{{ post.likes_count }}</span>
+                    </button>
+                </form>
+
+                <span>💬 {{ post.get_comment_count }}</span>
+            </div>
+
+            <!-- Комментарии -->
+            <div style="margin-top: 15px;">
+                <h5>Комментарии:</h5>
+
+                {% for comment in post.comments.all|slice:":5" %}
+                <div style="background: #f5f5f5; padding: 10px; margin-bottom: 5px; border-radius: 5px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong>{{ comment.author.username }}</strong>
+                        <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                    <p style="margin: 5px 0;">{{ comment.content }}</p>
+
+                    {% if user == comment.author %}
+                    <div>
+                        <a href="{% url 'polls:edit_comment' comment.id %}" style="font-size: 12px;">Редактировать</a>
+                        <a href="{% url 'polls:delete_comment' comment.id %}" style="font-size: 12px; color: red; margin-left: 10px;">Удалить</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'polls:add_comment' post.id %}" style="margin-top: 10px;">
+                    {% csrf_token %}
+                    <input type="text" name="content" placeholder="Напишите комментарий..." style="width: 100%; padding: 8px;" required>
+                                        <button type="submit" style="margin-top: 5px;">Отправить</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p>Пока нет постов. Будьте первым!</p>
+        {% endfor %}
+
+        <!-- Пагинация -->
+        <div style="margin-top: 20px;">
+            {% if page_obj.has_previous %}
+            <a href="?page=1">Первая</a>
+            <a href="?page={{ page_obj.previous_page_number }}">Назад</a>
+            {% endif %}
+
+            <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Вперед</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// AJAX для лайков
+document.querySelectorAll('.like-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const url = this.action;
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const button = this.querySelector('button');
+            const likesCount = this.querySelector('.likes-count');
+
+            if (data.liked) {
+                button.innerHTML = '❤️ <span class="likes-count">' + data.likes_count + '</span>';
+            } else {
+                button.innerHTML = '🤍 <span class="likes-count">' + data.likes_count + '</span>';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

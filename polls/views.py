@@ -11,6 +11,7 @@ from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Question, Choice, Vote, UserProfile
 from .forms import CustomUserCreationForm, UserProfileForm, QuestionForm
+from django.contrib.auth.models import User
 
 
 #регистрация пользователя
@@ -215,3 +216,205 @@ def vote(request, question_id):
 
     messages.success(request, 'Ваш голос учтен!')
     return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+# Добавить импорты
+from .models import MicroblogPost, PostLike, PostComment
+from .forms import MicroblogPostForm, PostCommentForm
+from django.core.paginator import Paginator
+
+
+# Добавить представления для микроблогов
+
+@login_required
+def create_post(request):
+    """Создание нового поста"""
+    if request.method == 'POST':
+        form = MicroblogPostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            messages.success(request, 'Пост опубликован!')
+            return redirect('polls:microblog_feed')
+    else:
+        form = MicroblogPostForm()
+
+    return render(request, 'polls/create_post.html', {'form': form})
+
+
+def microblog_feed(request):
+    """Лента постов (главная страница микроблогов)"""
+    posts_list = MicroblogPost.objects.all().select_related('author')
+    paginator = Paginator(posts_list, 10)  # 10 постов на странице
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    comment_form = PostCommentForm()
+
+    return render(request, 'polls/microblog_feed.html', {
+        'page_obj': page_obj,
+        'comment_form': comment_form,
+    })
+
+
+@login_required
+def edit_post(request, post_id):
+    """Редактирование поста"""
+    post = get_object_or_404(MicroblogPost, id=post_id, author=request.user)
+
+    if request.method == 'POST':
+        form = MicroblogPostForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Пост обновлен!')
+            return redirect('polls:user_profile', username=request.user.username)
+    else:
+        form = MicroblogPostForm(instance=post)
+
+    return render(request, 'polls/edit_post.html', {'form': form, 'post': post})
+
+
+@login_required
+def delete_post(request, post_id):
+    """Удаление поста"""
+    post = get_object_or_404(MicroblogPost, id=post_id, author=request.user)
+
+    if request.method == 'POST':
+        post.delete()
+        messages.success(request, 'Пост удален!')
+        return redirect('polls:user_profile', username=request.user.username)
+
+    return render(request, 'polls/delete_post_confirm.html', {'post': post})
+
+
+@login_required
+def like_post(request, post_id):
+    """Лайк/анлайк поста"""
+    post = get_object_or_404(MicroblogPost, id=post_id)
+
+    # Проверяем, лайкал ли уже пользователь этот пост
+    like_exists = PostLike.objects.filter(user=request.user, post=post).exists()
+
+    if like_exists:
+        # Убираем лайк
+        PostLike.objects.filter(user=request.user, post=post).delete()
+        post.likes_count -= 1
+        liked = False
+    else:
+        # Ставим лайк
+        PostLike.objects.create(user=request.user, post=post)
+        post.likes_count += 1
+        liked = True
+
+    post.save()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # AJAX запрос
+        return JsonResponse({
+            'liked': liked,
+            'likes_count': post.likes_count
+        })
+
+    return redirect(request.META.get('HTTP_REFERER', 'polls:microblog_feed'))
+
+
+@login_required
+def add_comment(request, post_id):
+    """Добавление комментария"""
+    post = get_object_or_404(MicroblogPost, id=post_id)
+
+    if request.method == 'POST':
+        form = PostCommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.post = post
+            comment.save()
+            messages.success(request, 'Комментарий добавлен!')
+
+    return redirect(request.META.get('HTTP_REFERER', 'polls:microblog_feed'))
+
+
+@login_required
+def edit_comment(request, comment_id):
+    """Редактирование комментария"""
+    comment = get_object_or_404(PostComment, id=comment_id, author=request.user)
+
+    if request.method == 'POST':
+        form = PostCommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Комментарий обновлен!')
+            return redirect('polls:microblog_feed')
+    else:
+        form = PostCommentForm(instance=comment)
+
+    return render(request, 'polls/edit_comment.html', {'form': form, 'comment': comment})
+
+
+@login_required
+def delete_comment(request, comment_id):
+    """Удаление комментария"""
+    comment = get_object_or_404(PostComment, id=comment_id, author=request.user)
+
+    if request.method == 'POST':
+        comment.delete()
+        messages.success(request, 'Комментарий удален!')
+
+    return redirect(request.META.get('HTTP_REFERER', 'polls:microblog_feed'))
+
+
+def user_profile(request, username):
+    """Профиль пользователя с его постами"""
+    user = get_object_or_404(User, username=username)
+    user_profile_obj = user.profile
+
+    posts_list = MicroblogPost.objects.filter(author=user)
+    paginator = Paginator(posts_list, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'profile_user': user,
+        'user_profile': user_profile_obj,
+        'page_obj': page_obj,
+    }
+
+    return render(request, 'polls/user_profile.html', context)
+
+
+# Обновить существующую функцию profile для редактирования своего профиля
+@login_required
+def edit_profile(request):
+    """Редактирование профиля пользователя"""
+    user_profile_obj = request.user.profile
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=user_profile_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Профиль обновлен!')
+            return redirect('polls:user_profile', username=request.user.username)
+    else:
+        form = UserProfileForm(instance=user_profile_obj)
+
+    return render(request, 'polls/edit_profile.html', {'form': form})
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+
+@login_required
+def edit_profile(request, username):
+    if request.user.username != username:
+        return redirect("polls:user_profile", username=username)
+
+    if request.method == "POST":
+        # позже добавим форму
+        pass
+
+    return render(request, "polls/edit_profile.html", {
+        "profile_user": request.user
+    })

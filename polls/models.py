@@ -91,3 +91,55 @@ class Vote(models.Model):
 
     def __str__(self):
         return f'{self.user.username} voted for {self.choice.choice_text}'
+
+
+class MicroblogPost(models.Model):
+    """Модель поста микроблога"""
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    content = models.TextField(max_length=1000, verbose_name='Текст поста')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    likes_count = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Пост микроблога'
+        verbose_name_plural = 'Посты микроблога'
+
+    def __str__(self):
+        return f'Пост от {self.author.username}'
+
+    def get_comment_count(self):
+        return self.comments.count()
+
+
+class PostLike(models.Model):
+    """Модель лайка поста"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(MicroblogPost, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'post']
+        verbose_name = 'Лайк поста'
+        verbose_name_plural = 'Лайки постов'
+
+    def __str__(self):
+        return f'{self.user.username} лайкнул пост #{self.post.id}'
+
+
+class PostComment(models.Model):
+    """Модель комментария к посту"""
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(MicroblogPost, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField(max_length=500, verbose_name='Текст комментария')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return f'Комментарий от {self.author.username}'

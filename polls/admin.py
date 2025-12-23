@@ -26,3 +26,40 @@ class UserProfileAdmin(admin.ModelAdmin):
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Vote, VoteAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
+
+# Добавить в admin.py
+from .models import MicroblogPost, PostLike, PostComment
+
+
+class PostCommentInline(admin.TabularInline):
+    model = PostComment
+    extra = 1
+
+
+class MicroblogPostAdmin(admin.ModelAdmin):
+    list_display = ('author', 'content_preview', 'created_at', 'likes_count')
+    list_filter = ['created_at', 'author']
+    search_fields = ['content', 'author__username']
+    inlines = [PostCommentInline]
+
+    def content_preview(self, obj):
+        return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
+
+    content_preview.short_description = 'Содержание'
+
+
+class PostCommentAdmin(admin.ModelAdmin):
+    list_display = ('author', 'content_preview', 'post', 'created_at')
+    list_filter = ['created_at', 'author']
+    search_fields = ['content', 'author__username']
+
+    def content_preview(self, obj):
+        return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
+
+    content_preview.short_description = 'Комментарий'
+
+
+# Зарегистрировать новые модели
+admin.site.register(MicroblogPost, MicroblogPostAdmin)
+admin.site.register(PostLike)
+admin.site.register(PostComment, PostCommentAdmin)

@@ -1,0 +1,15 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Удаление поста{% endblock %}
+
+{% block content %}
+<h2>Удалить пост?</h2>
+
+<p>Вы действительно хотите удалить пост: "{{ post.text }}"?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Да, удалить</button>
+    <a href="{% url 'polls:microblog' %}">Отмена</a>
+</form>
+{% endblock %}

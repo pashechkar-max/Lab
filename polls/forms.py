@@ -1,5 +1,5 @@
 from django import forms
-from .models import UserProfile, Question
+from .models import UserProfile, Question, MicroblogPost, PostComment
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -147,3 +147,40 @@ class CustomUserCreationForm(UserCreationForm):
             )
 
         return user
+
+# Добавить в forms.py
+
+class MicroblogPostForm(forms.ModelForm):
+    """Форма для создания и редактирования поста"""
+    class Meta:
+        model = MicroblogPost
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Что у вас нового?',
+                'maxlength': 1000
+            }),
+        }
+        labels = {
+            'content': 'Текст поста'
+        }
+
+
+class PostCommentForm(forms.ModelForm):
+    """Форма для комментариев"""
+    class Meta:
+        model = PostComment
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Напишите комментарий...',
+                'maxlength': 500
+            }),
+        }
+        labels = {
+            'content': 'Комментарий'
+        }

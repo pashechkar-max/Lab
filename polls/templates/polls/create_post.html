@@ -1,0 +1,13 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Новый пост{% endblock %}
+
+{% block content %}
+<h2>Создать пост</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Опубликовать</button>
+</form>
+{% endblock %}
