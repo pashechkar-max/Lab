@@ -5,8 +5,7 @@ from django.contrib.auth.models import User
 
 # forms.py
 class UserProfileForm(forms.ModelForm):
-    """Форма для редактирования профиля пользователя с загрузкой файлов"""
-
+    # редактирования профиля пользователя
     class Meta:
         model = UserProfile
         fields = ['avatar', 'bio']
@@ -35,8 +34,7 @@ class UserProfileForm(forms.ModelForm):
         self.fields['avatar'].required = True
 
 class QuestionForm(forms.ModelForm):
-    """Форма для создания вопроса"""
-
+    #создания вопроса
     class Meta:
         model = Question
         fields = ['question_text', 'short_description', 'full_description', 'expiration_date', 'image']
@@ -73,7 +71,7 @@ class QuestionForm(forms.ModelForm):
             }),
         }
 
-    # Поля для вариантов ответов
+    # Варианты ответов
     choice1 = forms.CharField(
         max_length=200,
         label='Вариант ответа 1',
@@ -113,7 +111,7 @@ class QuestionForm(forms.ModelForm):
 
 
 class CustomUserCreationForm(UserCreationForm):
-    """Кастомная форма регистрации с полем для аватара"""
+    #форма регистрации с для аватара
     avatar_url = forms.URLField(
         label='Аватар (URL)',
         required=True,
@@ -142,7 +140,7 @@ class CustomUserCreationForm(UserCreationForm):
 
         if commit:
             user.save()
-            # Создаем профиль с аватаром
+            # Профиль
             UserProfile.objects.create(
                 user=user,
                 avatar=self.cleaned_data['avatar_url']

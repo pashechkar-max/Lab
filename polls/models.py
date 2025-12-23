@@ -8,7 +8,8 @@ from django.dispatch import receiver
 
 
 class UserProfile(models.Model):
-    """Модель профиля пользователя"""
+
+    # профиля пользователя
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     avatar = models.ImageField(
         upload_to='avatars/',
@@ -27,9 +28,11 @@ class UserProfile(models.Model):
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    """Создает профиль пользователя при создании нового пользователя"""
+
+    # профиль пользователя при
+
     if created:
-        # Устанавливаем аватар по умолчанию
+        # аватар по
         default_avatar = 'media/avatars/ez.jpg'
         UserProfile.objects.create(user=instance, avatar=default_avatar)
 

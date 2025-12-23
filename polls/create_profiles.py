@@ -7,7 +7,7 @@ django.setup()
 from django.contrib.auth.models import User
 from polls.models import UserProfile
 
-# Создаем профили для всех существующих пользователей
+# Профили
 for user in User.objects.all():
     UserProfile.objects.get_or_create(user=user)
     print(f'Создан профиль для пользователя: {user.username}')

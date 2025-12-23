@@ -4,21 +4,21 @@ from . import views
 
 app_name = 'polls'
 urlpatterns = [
-    # Основные маршруты
+    #основные маршруты
     path('', views.IndexView.as_view(), name='index'),
     path('<int:pk>/', views.DetailView.as_view(), name='detail'),
     path('<int:pk>/results/', views.ResultsView.as_view(), name='results'),
     path('<int:question_id>/vote/', views.vote, name='vote'),
 
-    # Маршруты для пользователей
+    #для пользователей
     path('register/', views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='polls/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='polls/logout.html', next_page='polls:index'), name='logout'),
 
-    # Маршруты профиля
+    #профиля
     path('profile/', views.profile, name='profile'),
     path('profile/delete/', views.delete_profile, name='delete_profile'),
 
-    # Создание вопроса
+    # Вопросы
     path('create/', views.create_question, name='create_question'),
 ]
