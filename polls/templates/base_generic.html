@@ -7,21 +7,24 @@
 </head>
 <body>
     <div>
-        <nav>
-            <a href="{% url 'polls:index' %}" >Главная</a>
+        <!-- Обновить навигацию в base_generic.html -->
+<nav>
+    <a href="{% url 'polls:microblog_feed' %}">Микроблоги</a>
+    <a href="{% url 'polls:index' %}">Опросы</a>
 
-            {% if user.is_authenticated %}
-                <a href="{% url 'polls:create_question' %}">Создать вопрос</a>
-                <a href="{% url 'polls:profile' %}" >Профиль</a>
-                <form method="post" action="{% url 'polls:logout' %}">
-                    {% csrf_token %}
-                    <button> Выйти</button>
-                </form>
-            {% else %}
-                <a href="{% url 'polls:login' %}" >Войти</a>
-                <a href="{% url 'polls:register' %}" >Регистрация</a>
-            {% endif %}
-        </nav>
+    {% if user.is_authenticated %}
+        <a href="{% url 'polls:create_post' %}">Новый пост</a>
+        <a href="{% url 'polls:create_question' %}">Создать опрос</a>
+        <a href="{% url 'polls:user_profile' user.username %}">Мой профиль</a>
+        <form method="post" action="{% url 'polls:logout' %}">
+            {% csrf_token %}
+            <button type="submit">Выйти</button>
+        </form>
+    {% else %}
+        <a href="{% url 'polls:login' %}">Войти</a>
+        <a href="{% url 'polls:register' %}">Регистрация</a>
+    {% endif %}
+</nav>
     </div>
 
     <hr>
