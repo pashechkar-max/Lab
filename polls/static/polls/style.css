@@ -1,251 +1,139 @@
-:root{
-  --bg:#0f1220;
-  --surface:rgba(255,255,255,.08);
-  --surface-strong:rgba(255,255,255,.12);
-  --text:#eef1ff;
-  --muted:#a5accf;
-  --accent:#6c7bff;
-  --accent-2:#3ef2c2;
-  --danger:#ff6b6b;
-
-  --radius:14px;
-  --blur:14px;
-  --shadow:0 10px 40px rgba(0,0,0,.35);
-  --transition:220ms cubic-bezier(.2,.9,.3,1);
-  --max-width:1100px;
-
-  --font:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+/* Основные стили */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
 }
 
-*,
-*::before,
-*::after{
-  box-sizing:border-box;
+a {
+    color: #007bff;
+    text-decoration: none;
 }
 
-html,body{
-  margin:0;
-  padding:0;
-  font-family:var(--font);
-  background:
-    radial-gradient(1200px 600px at 20% -10%,rgba(108,123,255,.25),transparent 60%),
-    radial-gradient(900px 500px at 90% 10%,rgba(62,242,194,.18),transparent 60%),
-    var(--bg);
-  color:var(--text);
+a:hover {
+    text-decoration: underline;
 }
 
-a{
-  color:inherit;
-  text-decoration:none;
+/* Контейнер */
+.container {
+    width: 90%;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-img{
-  max-width:100%;
-  display:block;
+/* Заголовки */
+h1, h2, h3 {
+    color: #222;
 }
 
-.container{
-  max-width:var(--max-width);
-  margin:0 auto;
-  padding:1.2rem;
+/* Формы */
+form {
+    display: flex;
+    flex-direction: column;
 }
 
-.header{
-  position:sticky;
-  top:16px;
-  z-index:50;
+form input, form textarea, form select {
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-.header-inner{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:.7rem 1rem;
-  background:var(--surface);
-  backdrop-filter:blur(var(--blur));
-  border-radius:18px;
-  box-shadow:var(--shadow);
+form button {
+    width: 120px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:.6rem;
-  font-weight:800;
-  letter-spacing:.02em;
+form button:hover {
+    background-color: #0056b3;
 }
 
-.brand span{
-  background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
+/* Сообщения Django messages */
+.message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
 }
 
-.nav{
-  display:flex;
-  gap:.4rem;
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
 }
 
-.nav a{
-  padding:.45rem .75rem;
-  border-radius:10px;
-  color:var(--muted);
-  font-weight:600;
-  transition:var(--transition);
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 
-.nav a:hover{
-  color:var(--text);
-  background:var(--surface-strong);
+/* Список вопросов и постов */
+.question, .post {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
 }
 
-.card{
-  background:var(--surface);
-  backdrop-filter:blur(var(--blur));
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:1rem 1.1rem;
-  transition:var(--transition);
+.question:last-child, .post:last-child {
+    border-bottom: none;
 }
 
-.card:hover{
-  transform:translateY(-6px) scale(1.01);
+/* Кнопки действий на постах */
+.post-actions {
+    margin-top: 10px;
 }
 
-.card-header{
-  display:flex;
-  align-items:center;
-  gap:.7rem;
-  margin-bottom:.5rem;
+.post-actions button, .post-actions a {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
 }
 
-.avatar{
-  width:42px;
-  height:42px;
-  border-radius:12px;
-  background:linear-gradient(135deg,var(--accent),var(--accent-2));
-  display:grid;
-  place-items:center;
-  font-weight:700;
+.post-actions button {
+    border: 1px solid #007bff;
+    background-color: #fff;
+    color: #007bff;
+    cursor: pointer;
 }
 
-.stack{
-  display:flex;
-  flex-direction:column;
-  gap:.7rem;
+.post-actions button:hover {
+    background-color: #007bff;
+    color: #fff;
 }
 
-.row{
-  display:grid;
-  gap:1rem;
+/* Пагинация */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 
-@media(min-width:700px){
-  .row.cols-2{grid-template-columns:repeat(2,1fr)}
-  .row.cols-3{grid-template-columns:repeat(3,1fr)}
+.pagination a {
+    margin: 0 5px;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #007bff;
 }
 
-h1,h2,h3{
-  margin:0;
-  font-weight:800;
-  letter-spacing:-.02em;
+.pagination a.active {
+    background-color: #007bff;
+    color: white;
 }
 
-h1{
-  font-size:clamp(1.6rem,3.5vw,2.4rem);
-}
-
-h2{
-  font-size:1.3rem;
-}
-
-.text-muted{
-  color:var(--muted);
-}
-
-.btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:.5rem;
-  padding:.55rem 1rem;
-  border-radius:12px;
-  font-weight:700;
-  cursor:pointer;
-  transition:var(--transition);
-}
-
-.btn-primary{
-  background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  color:#0b0e18;
-  box-shadow:0 6px 20px rgba(108,123,255,.35);
-}
-
-.btn-primary:hover{
-  transform:translateY(-2px);
-}
-
-.btn-ghost{
-  background:var(--surface);
-  color:var(--text);
-}
-
-.btn-danger{
-  background:linear-gradient(90deg,#ff6b6b,#ff9f9f);
-  color:#2b0b0b;
-}
-
-input,
-textarea,
-select{
-  width:100%;
-  padding:.6rem .75rem;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.15);
-  background:var(--surface);
-  color:var(--text);
-  backdrop-filter:blur(var(--blur));
-  transition:var(--transition);
-}
-
-input:focus,
-textarea:focus,
-select:focus{
-  outline:none;
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(108,123,255,.25);
-}
-
-.form-group{
-  display:flex;
-  flex-direction:column;
-  gap:.3rem;
-}
-
-.badge{
-  display:inline-block;
-  padding:.25rem .6rem;
-  border-radius:999px;
-  font-size:.75rem;
-  font-weight:700;
-  background:rgba(108,123,255,.2);
-  color:var(--accent);
-}
-
-.footer{
-  margin-top:3rem;
-  padding:2rem 0;
-  text-align:center;
-  color:var(--muted);
-  font-size:.9rem;
-}
-
-.fade-in{
-  animation:fade .6s ease forwards;
-}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(8px)}
-  to{opacity:1;transform:none}
+.pagination a:hover {
+    background-color: #0056b3;
+    color: white;
 }
